@@ -458,14 +458,10 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? build ([\w\.\-_ ]+)(, (.+))?/i, id: 'jenkins.build', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).build false
-    else
-      @reply "Sorry. I cannot do that, #{msg.envelope.user}."
 
   robot.respond /j(?:enkins)? b (\d+)/i, id: 'jenkins.b', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).buildById()
-    else
-      @reply "Sorry. I cannot do that, #{msg.envelope.user}."
 
   robot.respond /j(?:enkins)? list( (.+))?/i, id: 'jenkins.list', (msg) ->
     pluginFactory(msg).list()
@@ -485,8 +481,6 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? setAlias (.*), (.*)/i, id: 'jenkins.setAlias', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).setAlias()
-    else
-      @reply "Sorry. I cannot do that, #{msg.envelope.user}."
 
   robot.jenkins =
     aliases:  ((msg) -> pluginFactory(msg).listAliases())
