@@ -1,5 +1,5 @@
 # Description:
-#   Interact with your Jenkins CI server
+#   Interact with your Jenkins CI server. Uses hubot-auth role 'jenkins-build'
 #
 # Dependencies:
 #   None
@@ -430,6 +430,8 @@ class HubotJenkinsPlugin extends HubotMessenger
 
 module.exports = (robot) ->
 
+  builderAuthRoles = ['admin', 'jenkins-build']
+
   # Factories
   # ---------
 
@@ -454,10 +456,15 @@ module.exports = (robot) ->
     pluginFactory(msg).listAliases()
 
   robot.respond /j(?:enkins)? build ([\w\.\-_ ]+)(, (.+))?/i, id: 'jenkins.build', (msg) ->
-    pluginFactory(msg).build false
+    if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
+      pluginFactory(msg).build false
+    else
+      @reply "I couldn't find that job. Try `jenkins list` to get a list."
+
 
   robot.respond /j(?:enkins)? b (\d+)/i, id: 'jenkins.b', (msg) ->
-    pluginFactory(msg).buildById()
+    if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
+      pluginFactory(msg).buildById()
 
   robot.respond /j(?:enkins)? list( (.+))?/i, id: 'jenkins.list', (msg) ->
     pluginFactory(msg).list()
@@ -475,7 +482,8 @@ module.exports = (robot) ->
     pluginFactory(msg).servers()
 
   robot.respond /j(?:enkins)? setAlias (.*), (.*)/i, id: 'jenkins.setAlias', (msg) ->
-    pluginFactory(msg).setAlias()
+    if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
+      pluginFactory(msg).setAlias()
 
   robot.jenkins =
     aliases:  ((msg) -> pluginFactory(msg).listAliases())
