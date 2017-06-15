@@ -461,7 +461,6 @@ module.exports = (robot) ->
     else
       @reply "Sorry. I cannot do that, #{msg.envelope.user}."
 
-
   robot.respond /j(?:enkins)? b (\d+)/i, id: 'jenkins.b', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).buildById()
