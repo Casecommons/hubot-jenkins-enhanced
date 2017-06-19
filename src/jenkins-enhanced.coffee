@@ -196,6 +196,10 @@ class HubotJenkinsPlugin extends HubotMessenger
     path = if @_params then "job/#{job}/buildWithParameters?#{@_params}" else "job/#{job}/#{command}"
     @_requestFactorySingle server, path, @_handleBuild, "post"
 
+  denyAccess: (command) =>
+    @reply "You do not apear to have permission to run #{command}."
+    return
+
   describe: =>
     return if not @_init(@describe)
     job = @_getJob()
@@ -458,10 +462,12 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? build ([\w\.\-_ ]+)(, (.+))?/i, id: 'jenkins.build', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).build false
+    else pluginFactory(msg).denyAccess('build')
 
   robot.respond /j(?:enkins)? b (\d+)/i, id: 'jenkins.b', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).buildById()
+    else pluginFactory(msg).denyAccess('b')
 
   robot.respond /j(?:enkins)? list( (.+))?/i, id: 'jenkins.list', (msg) ->
     pluginFactory(msg).list()
@@ -481,6 +487,7 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? setAlias (.*), (.*)/i, id: 'jenkins.setAlias', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).setAlias()
+    else pluginFactory(msg).denyAccess('setAlias')
 
   robot.jenkins =
     aliases:  ((msg) -> pluginFactory(msg).listAliases())
