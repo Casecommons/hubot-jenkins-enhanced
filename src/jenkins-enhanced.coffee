@@ -198,7 +198,7 @@ class HubotJenkinsPlugin extends HubotMessenger
 
   denyAccess: (command) =>
     @reply "You do not apear to have permission to run #{command}."
-    return
+    ret
 
   describe: =>
     return if not @_init(@describe)
@@ -289,6 +289,21 @@ class HubotJenkinsPlugin extends HubotMessenger
     response += "STATUS: #{job.color}\n"
     response += @_describeJobHealthReport(job.healthReport)
     response += @_describeJobActions(job.actions)
+    response
+
+  _slack_describeJob: (job) =>
+    response = { attachments: [{
+      fallback: response,
+      title: "JOB: #{job.displayName}",
+      text: """*URL:* #{job.url}
+        *DESCRIPTION:* #{job.description}
+        *ENABLED:* #{job.buildable}
+        *STATUS:* #{job.color}
+        #{@_describeJobHealthReport(job.healthReport)}
+        #{@_describeJobActions(job.actions)}
+      """,
+      color: "blue"
+      }] }
     response
 
   _describeJobActions: (actions) =>
@@ -462,12 +477,12 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? build ([\w\.\-_ ]+)(, (.+))?/i, id: 'jenkins.build', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).build false
-    else pluginFactory(msg).denyAccess('build')
+    else pluginFactory(msg).denyAccess()
 
   robot.respond /j(?:enkins)? b (\d+)/i, id: 'jenkins.b', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).buildById()
-    else pluginFactory(msg).denyAccess('b')
+    else pluginFactory(msg).denyAccess()
 
   robot.respond /j(?:enkins)? list( (.+))?/i, id: 'jenkins.list', (msg) ->
     pluginFactory(msg).list()
@@ -487,7 +502,7 @@ module.exports = (robot) ->
   robot.respond /j(?:enkins)? setAlias (.*), (.*)/i, id: 'jenkins.setAlias', (msg) ->
     if robot.auth.hasRole(msg.envelope.user, builderAuthRoles)
       pluginFactory(msg).setAlias()
-    else pluginFactory(msg).denyAccess('setAlias')
+    else pluginFactory(msg).denyAccess()
 
   robot.jenkins =
     aliases:  ((msg) -> pluginFactory(msg).listAliases())
