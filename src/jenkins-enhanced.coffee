@@ -388,7 +388,7 @@ class HubotJenkinsPlugin extends HubotMessenger
 
     try
       content = JSON.parse(body)
-      @send @_describeJob(content)
+      @send @_slack_describeJob(content)
 
       # Handle previous build status if there is one
       @_lastBuildStatus content.lastBuild if content.lastBuild
